@@ -3,16 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luna AI Prototype</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Luna Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #121212; color: white; }
+        #chatbox { width: 80%; max-width: 500px; margin: auto; padding: 10px; background: #222; border-radius: 10px; }
+        .message { padding: 8px; margin: 5px; border-radius: 5px; }
+        .user { background: #007bff; color: white; text-align: right; }
+        .bot { background: #444; color: white; text-align: left; }
+    </style>
 </head>
 <body>
-    <div class="chat-container">
-        <h1>Chat with Luna</h1>
-        <div id="chat-box"></div>
-        <input type="text" id="user-input" placeholder="Type a message..." />
-        <button onclick="sendMessage()">Send</button>
-    </div>
-    <script src="script.js"></script>
+    <h1>Chat with Luna</h1>
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKey(event)">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        const chatbox = document.getElementById("chatbox");
+
+        function handleKey(event) {
+            if (event.key === "Enter") sendMessage();
+        }
+
+        function sendMessage() {
+            let userText = document.getElementById("userInput").value;
+            if (!userText) return;
+            
+            addMessage("user", userText);
+            document.getElementById("userInput").value = "";
+
+            fetch("YOUR_COLAB_BACKEND_URL", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: userText })
+            })
+            .then(response => response.json())
+            .then(data => addMessage("bot", data.response))
+            .catch(error => addMessage("bot", "Error connecting to Luna!"));
+        }
+
+        function addMessage(role, text) {
+            let messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", role);
+            messageDiv.innerText = text;
+            chatbox.appendChild(messageDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+    </script>
 </body>
 </html>
