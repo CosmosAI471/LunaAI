@@ -32,7 +32,7 @@
             addMessage("user", userText);
             document.getElementById("userInput").value = "";
 
-            fetch("YOUR_COLAB_BACKEND_URL", {
+            fetch("https://colab.research.google.com/drive/15Ru3HnejZ8rdbB5YFhllJfAU3kFAzK3t#scrollTo=AKP8HciX7cQo", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text: userText })
