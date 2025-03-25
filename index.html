@@ -3,39 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmos AI</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #0b0c10;
-            color: #c5c6c7;
-            text-align: center;
-            padding: 50px;
-        }
-        h1 {
-            color: #66fcf1;
-        }
-        p {
-            font-size: 18px;
-        }
-        .button {
-            background-color: #45a29e;
-            color: white;
-            padding: 15px 30px;
-            text-decoration: none;
-            font-size: 20px;
-            border-radius: 8px;
-            display: inline-block;
-            margin-top: 20px;
-        }
-        .button:hover {
-            background-color: #1f2833;
-        }
-    </style>
+    <title>Luna AI Chat</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Welcome to Cosmos AI</h1>
-    <p>Enter the future of AI's!</p>
-    <a href="https://huggingface.co/spaces/cosmosai471/LunaAI" class="button">Try it for Free</a>
+    <div class="chat-container">
+        <h1>Chat with Luna</h1>
+        <div id="chat-box"></div>
+        <input type="text" id="user-input" placeholder="Type a message..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
