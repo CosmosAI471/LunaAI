@@ -1,54 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luna Chat</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #121212; color: white; }
-        #chatbox { width: 80%; max-width: 500px; margin: auto; padding: 10px; background: #222; border-radius: 10px; }
-        .message { padding: 8px; margin: 5px; border-radius: 5px; }
-        .user { background: #007bff; color: white; text-align: right; }
-        .bot { background: #444; color: white; text-align: left; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Chat with Luna</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: #fff; margin: 0; padding: 20px; }
+    #chat { max-height: 80vh; overflow-y: auto; margin-bottom: 10px; }
+    .bubble { padding: 10px; border-radius: 10px; margin: 5px 0; max-width: 70%; }
+    .user { background: #444; align-self: flex-end; text-align: right; }
+    .luna { background: #222; }
+    #input-area { display: flex; gap: 10px; }
+    input { flex: 1; padding: 10px; border-radius: 5px; border: none; }
+    button { padding: 10px 20px; border: none; background: #00bfa5; color: white; border-radius: 5px; }
+  </style>
 </head>
 <body>
-    <h1>Chat with Luna</h1>
-    <div id="chatbox"></div>
-    <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleKey(event)">
-    <button onclick="sendMessage()">Send</button>
+  <h1>Chat with Luna</h1>
+  <div id="chat"></div>
+  <div id="input-area">
+    <input id="userInput" placeholder="Say something..." />
+    <button onclick="send()">Send</button>
+  </div>
 
-    <script>
-        const chatbox = document.getElementById("chatbox");
+  <script>
+    async function send() {
+      const input = document.getElementById("userInput");
+      const msg = input.value.trim();
+      if (!msg) return;
 
-        function handleKey(event) {
-            if (event.key === "Enter") sendMessage();
-        }
+      appendMessage(msg, 'user');
+      input.value = "";
 
-        function sendMessage() {
-            let userText = document.getElementById("userInput").value;
-            if (!userText) return;
-            
-            addMessage("user", userText);
-            document.getElementById("userInput").value = "";
+      const res = await fetch("https://<your_colab_tunnel_or_backend_url>/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: msg })
+      });
 
-            fetch("https://9c7k2cgsrmf-496ff2e9c6d22116-5000-colab.googleusercontent.com/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text: userText })
-            })
-            .then(response => response.json())
-            .then(data => addMessage("bot", data.response))
-            .catch(error => addMessage("bot", "Error connecting to Luna!"));
-        }
+      const data = await res.json();
+      appendMessage(data.answer, 'luna');
+    }
 
-        function addMessage(role, text) {
-            let messageDiv = document.createElement("div");
-            messageDiv.classList.add("message", role);
-            messageDiv.innerText = text;
-            chatbox.appendChild(messageDiv);
-            chatbox.scrollTop = chatbox.scrollHeight;
-        }
-    </script>
+    function appendMessage(text, role) {
+      const chat = document.getElementById("chat");
+      const div = document.createElement("div");
+      div.className = `bubble ${role}`;
+      div.innerText = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
 </body>
 </html>
