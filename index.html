@@ -31,7 +31,7 @@
       appendMessage(msg, 'user');
       input.value = "";
 
-      const res = await fetch("https://<your_colab_tunnel_or_backend_url>/chat", {
+      const res = await fetch("http://127.0.0.1:5000/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: msg })
