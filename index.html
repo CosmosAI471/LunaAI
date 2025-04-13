@@ -5,43 +5,30 @@
 </head>
 <body>
   <h2>Talk to Luna</h2>
-  <button onclick="startListening()">Start Talking</button>
-  <p id="transcript">Your speech will appear here...</p>
-  <p id="response">Luna will reply here...</p>
+  <input type="text" id="userInput" placeholder="Type something..." />
+  <button onclick="sendMessage()">Send</button>
+  <p id="lunaReply"></p>
+  <audio id="audioPlayer" controls></audio>
 
-<script>
-let lunaEndpoint = "<PUT_YOUR_NGROK_URL_HERE>/ask";
+  <script>
+    const BASE_URL = "https://happy-streams-smithsonian-vertex.trycloudflare.com/";
 
-function startListening() {
-  const recognition = new webkitSpeechRecognition();
-  recognition.lang = "en-US";
-  recognition.onresult = function(event) {
-    const userText = event.results[0][0].transcript;
-    document.getElementById("transcript").innerText = "You: " + userText;
-    sendToLuna(userText);
-  };
-  recognition.start();
-}
+    async function sendMessage() {
+      const message = document.getElementById("userInput").value;
+      const res = await fetch(BASE_URL + "/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      });
+      const data = await res.json();
+      document.getElementById("lunaReply").innerText = data.response;
 
-function sendToLuna(message) {
-  fetch(lunaEndpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: message })
-  })
-  .then(res => res.json())
-  .then(data => {
-    const reply = data.response;
-    document.getElementById("response").innerText = reply;
-    speak(reply);
-  });
-}
-
-function speak(text) {
-  const synth = window.speechSynthesis;
-  const utter = new SpeechSynthesisUtterance(text);
-  synth.speak(utter);
-}
-</script>
+      const audioRes = await fetch(BASE_URL + "/voice");
+      const audioBlob = await audioRes.blob();
+      const audioURL = URL.createObjectURL(audioBlob);
+      document.getElementById("audioPlayer").src = audioURL;
+      document.getElementById("audioPlayer").play();
+    }
+  </script>
 </body>
 </html>
