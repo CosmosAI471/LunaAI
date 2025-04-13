@@ -1,54 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Chat with Luna</title>
-  <style>
-    body { font-family: sans-serif; background: #111; color: #fff; margin: 0; padding: 20px; }
-    #chat { max-height: 80vh; overflow-y: auto; margin-bottom: 10px; }
-    .bubble { padding: 10px; border-radius: 10px; margin: 5px 0; max-width: 70%; }
-    .user { background: #444; align-self: flex-end; text-align: right; }
-    .luna { background: #222; }
-    #input-area { display: flex; gap: 10px; }
-    input { flex: 1; padding: 10px; border-radius: 5px; border: none; }
-    button { padding: 10px 20px; border: none; background: #00bfa5; color: white; border-radius: 5px; }
-  </style>
+  <title>Luna Voice Chat</title>
 </head>
 <body>
-  <h1>Chat with Luna</h1>
-  <div id="chat"></div>
-  <div id="input-area">
-    <input id="userInput" placeholder="Say something..." />
-    <button onclick="send()">Send</button>
-  </div>
+  <h2>Talk to Luna</h2>
+  <button onclick="startListening()">Start Talking</button>
+  <p id="transcript">Your speech will appear here...</p>
+  <p id="response">Luna will reply here...</p>
 
-  <script>
-    async function send() {
-      const input = document.getElementById("userInput");
-      const msg = input.value.trim();
-      if (!msg) return;
+<script>
+let lunaEndpoint = "<PUT_YOUR_NGROK_URL_HERE>/ask";
 
-      appendMessage(msg, 'user');
-      input.value = "";
+function startListening() {
+  const recognition = new webkitSpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.onresult = function(event) {
+    const userText = event.results[0][0].transcript;
+    document.getElementById("transcript").innerText = "You: " + userText;
+    sendToLuna(userText);
+  };
+  recognition.start();
+}
 
-      const res = await fetch("http://127.0.0.1:5000/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: msg })
-      });
+function sendToLuna(message) {
+  fetch(lunaEndpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: message })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const reply = data.response;
+    document.getElementById("response").innerText = reply;
+    speak(reply);
+  });
+}
 
-      const data = await res.json();
-      appendMessage(data.answer, 'luna');
-    }
-
-    function appendMessage(text, role) {
-      const chat = document.getElementById("chat");
-      const div = document.createElement("div");
-      div.className = `bubble ${role}`;
-      div.innerText = text;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-    }
-  </script>
+function speak(text) {
+  const synth = window.speechSynthesis;
+  const utter = new SpeechSynthesisUtterance(text);
+  synth.speak(utter);
+}
+</script>
 </body>
 </html>
