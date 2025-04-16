@@ -12,7 +12,7 @@
   <script>
     async function sendMessage() {
       const input = document.getElementById("userInput").value;
-      const res = await fetch("https://YOUR_RENDER_URL/chat", {
+      const res = await fetch("https://lunaai-7j1o.onrender.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: input })
