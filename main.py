@@ -11,7 +11,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-API_URL = "https://api-inference.huggingface.co/models/cosmosai471/Luna-v2"
+API_URL = "https://huggingface.co/cosmosai471/Luna-v2"
 HEADERS = {"Authorization": "Bearer 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"}
 
 @app.post("/chat")
