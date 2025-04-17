@@ -13,7 +13,7 @@ app.add_middleware(
 )
 
 API_URL = "https://api-inference.huggingface.co/models/cosmosai471/Luna-v2"
-HEADERS = {"Authorization": "Bearer hf_xxxYourTokenHerexxx"}  # Replace with your token
+HEADERS = {"Authorization": "Bearer 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"}  # Replace with your token
 
 @app.post("/chat")
 async def chat(request: Request):
