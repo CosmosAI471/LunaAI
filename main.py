@@ -12,7 +12,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-API_URL = "https://api-inference.huggingface.co/models/cosmosai471/Luna-v2"
+API_URL = "https://huggingface.co/spaces/cosmosai471/Luna"
 HEADERS = {"Authorization": "Bearer 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"}  # Replace with your token
 
 @app.post("/chat")
