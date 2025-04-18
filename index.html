@@ -2,23 +2,41 @@
 <html>
 <head>
   <title>Luna Chat</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    #chatbox { width: 100%; height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
+    input, button { padding: 10px; margin-top: 10px; }
+  </style>
 </head>
 <body>
-  <h2>Chat with Luna</h2>
-  <input id="userInput" placeholder="Say something..." />
-  <button onclick="sendMessage()">Send</button>
-  <div id="chatBox"></div>
+  <h2>Talk to Luna</h2>
+  <div id="chatbox"></div>
+  <input type="text" id="userInput" placeholder="Ask Luna..." />
+  <button onclick="sendToLuna()">Send</button>
 
   <script>
-    async function sendMessage() {
+    async function sendToLuna() {
       const input = document.getElementById("userInput").value;
-      const res = await fetch("https://lunaai-7j1o.onrender.com/chat", {
+      if (!input) return;
+
+      const chatbox = document.getElementById("chatbox");
+      chatbox.innerHTML += `<p><b>You:</b> ${input}</p>`;
+
+      const response = await fetch("https://cosmosai471--lunaapi.hf.space/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input })
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          prompt: input,
+          max_tokens: 256
+        })
       });
-      const data = await res.json();
-      document.getElementById("chatBox").innerHTML += `<p><b>You:</b> ${input}</p><p><b>Luna:</b> ${data.reply}</p>`;
+
+      const data = await response.json();
+      chatbox.innerHTML += `<p><b>Luna:</b> ${data.response || "Error: " + data.error}</p>`;
+      document.getElementById("userInput").value = "";
+      chatbox.scrollTop = chatbox.scrollHeight;
     }
   </script>
 </body>
