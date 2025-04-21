@@ -19,7 +19,7 @@
       const input = document.getElementById("userInput").value;
       const responseDiv = document.getElementById("response");
       responseDiv.innerHTML = "Thinking...";
-      const res = await fetch("https://your-render-backend-url/chat", {
+      const res = await fetch("https://lunaai-7j1o.onrender.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: input })
