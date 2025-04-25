@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Luna | Cosmos AI</title>
+  <title>Luna | Cosmos Developers</title>
   <style>
     body { font-family: Arial; background: #101820; color: white; text-align: center; padding: 40px; }
     textarea, button { width: 90%; margin: 10px; padding: 10px; }
@@ -9,44 +9,18 @@
   </style>
 </head>
 <body>
+
+	
+  <h1>Welcome to Luna by Cosmos AI</h1>
 <iframe
 	src="https://cosmosai471-luna.hf.space"
 	frameborder="0"
 	width="850"
-	height="450"
+	height="550"
 ></iframe>
-	
-  <h1>Welcome to Luna by Cosmos AI</h1>
-  <textarea id="userInput" placeholder="Say something to Luna..."></textarea><br>
-  <button onclick="askLuna()">Ask Luna</button>
-  <div id="response" class="response"></div>
 
   <script>
-async function askLuna() {
-  const input = document.getElementById("userInput").value;
-  const responseDiv = document.getElementById("response");
-  responseDiv.innerHTML = "Thinking...";
-  
-  try {
-    const res = await fetch("https://lunaai-2rr5.onrender.com", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: input })
-    });
 
-    const data = await res.json();
-
-    if (data && data.response) {
-      responseDiv.innerHTML = "<b>Luna:</b> " + data.response;
-    } else {
-      responseDiv.innerHTML = "<b>Error:</b> No response from Luna.";
-    }
-  } catch (err) {
-    responseDiv.innerHTML = "<b>Error:</b> " + err.message;
-  }
-}
-  
-  </script>
   <script
 	type="module"
 	src="https://gradio.s3-us-west-2.amazonaws.com/5.0.1/gradio.js"
