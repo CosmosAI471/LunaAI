@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: luna-backend
-    runtime: python
-    buildCommand: ""
-    startCommand: "python app.py"
