@@ -1,74 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
+  <title>Luna Web Chat</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Luna | Cosmos Developers</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      background-color: #101820;
-      color: #ffffff;
-      text-align: center;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      font-size: 2em;
-    }
-
-    .iframe-container {
-      position: absolute;
-      width: 100%;
-      max-width: 850px;
-      margin: 0 auto;
-      padding-bottom: 100%; /* Maintains aspect ratio (850/550 ≈ 1.54) */
-      height: 0;
-      overflow: hidden;
-    }
-
-    .iframe-container iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
-
-    @media screen and (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-
-      h1 {
-        font-size: 1.5em;
-      }
-
-      .iframe-container {
-        padding-bottom: 100%; /* Slightly taller on narrow screens */
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-  <h1>Welcome to Luna by Cosmos AI</h1>
-
-<iframe
-	src="https://cosmosai471-luna.hf.space"
-	frameborder="0"
-	width="device-width"
-	height="550"
-></iframe>
-
-  
-
+  <div class="chatbox">
+    <div id="chatlog"></div>
+    <button onclick="startVoiceInput()">Talk</button>
+    <input type="text" id="textInput" placeholder="Type message..." />
+    <button onclick="sendText()">Send</button>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
