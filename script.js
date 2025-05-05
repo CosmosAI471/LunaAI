@@ -56,3 +56,4 @@ function sendText() {
     sendToLuna(msg, latitude, longitude);
   }, () => sendToLuna(msg));
 }
+
