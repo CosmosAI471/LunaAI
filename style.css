@@ -1,0 +1,25 @@
+body {
+  font-family: sans-serif;
+  background: #f0f0f0;
+  padding: 20px;
+}
+.chatbox {
+  max-width: 600px;
+  margin: auto;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+}
+#chatlog {
+  height: 300px;
+  overflow-y: scroll;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+.user { color: blue; margin: 5px 0; }
+.luna { color: green; margin: 5px 0; }
+button {
+  padding: 10px;
+  margin: 5px;
+}
