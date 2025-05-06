@@ -1,4 +1,4 @@
-const API_URL = "https://luna-backend-7ryq.onrender.com/lunaapi";
+const API_URL = "https://luna-backend-7ryq.onrender.com/chat";
 
 function speak(text) {
   const utterance = new SpeechSynthesisUtterance(text);
