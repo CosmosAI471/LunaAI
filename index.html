@@ -1,19 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Luna Web Chat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luna Chat</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: #fff; margin:0; }
+    .chat { max-width: 600px; margin: auto; padding: 20px; }
+    .msg { margin: 10px 0; padding: 10px; border-radius: 8px; }
+    .user { background: #444; text-align: right; }
+    .ai { background: #222; text-align: left; }
+    input { width: 80%; padding: 10px; border:none; border-radius: 5px; }
+    button { padding: 10px; background:#08f; color:white; border:none; border-radius: 5px; }
+  </style>
 </head>
 <body>
-  <div class="chatbox">
-    <div id="chatlog"></div>
-    <button onclick="startVoiceInput()">Talk</button>
-    <input type="text" id="textInput" placeholder="Type message..." />
-    <button onclick="sendText()">Send</button>
+  <div class="chat" id="chat"></div>
+  <div style="text-align:center;">
+    <input id="input" placeholder="Type message...">
+    <button onclick="send()">Send</button>
   </div>
-  <script src="script.js"></script>
+  <script>
+    async function send() {
+      let inp = document.getElementById("input");
+      let text = inp.value; inp.value="";
+      let chat = document.getElementById("chat");
+      chat.innerHTML += `<div class='msg user'>${text}</div>`;
+      let res = await fetch("YOUR_COLAB_URL/chat", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({prompt:text})
+      });
+      let data = await res.json();
+      chat.innerHTML += `<div class='msg ai'>${data.reply}</div>`;
+      window.scrollTo(0,document.body.scrollHeight);
+    }
+  </script>
 </body>
 </html>
-
-
