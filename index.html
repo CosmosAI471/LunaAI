@@ -26,7 +26,7 @@
       let text = inp.value; inp.value="";
       let chat = document.getElementById("chat");
       chat.innerHTML += `<div class='msg user'>${text}</div>`;
-      let res = await fetch("YOUR_COLAB_URL/chat", {
+      let res = await fetch("https://luna-ai.loca.lt/chat", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({prompt:text})
