@@ -10,30 +10,63 @@
     .msg { margin: 10px 0; padding: 10px; border-radius: 8px; }
     .user { background: #444; text-align: right; }
     .ai { background: #222; text-align: left; }
-    input { width: 80%; padding: 10px; border:none; border-radius: 5px; }
+    .thinking { background: #333; font-style: italic; color: #aaa; }
+    input { width: 70%; padding: 10px; border:none; border-radius: 5px; }
     button { padding: 10px; background:#08f; color:white; border:none; border-radius: 5px; }
   </style>
 </head>
 <body>
   <div class="chat" id="chat"></div>
   <div style="text-align:center;">
-    <input id="input" placeholder="Type message...">
+    <input id="input" placeholder="Type message..." onkeydown="if(event.key==='Enter'){send();}">
     <button onclick="send()">Send</button>
   </div>
   <script>
+    const API_URL = "https://luna-ai.loca.lt/chat"; // 🔹 change if Colab gives new tunnel
+
     async function send() {
       let inp = document.getElementById("input");
-      let text = inp.value; inp.value="";
+      let text = inp.value.trim();
+      if (!text) return;
+      inp.value="";
+
       let chat = document.getElementById("chat");
       chat.innerHTML += `<div class='msg user'>${text}</div>`;
-      let res = await fetch("https://luna-ai.loca.lt/chat", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({prompt:text})
-      });
-      let data = await res.json();
-      chat.innerHTML += `<div class='msg ai'>${data.reply}</div>`;
+
+      // Show "thinking..." while waiting
+      let thinking = document.createElement("div");
+      thinking.className = "msg thinking";
+      thinking.innerText = "Luna is thinking...";
+      chat.appendChild(thinking);
       window.scrollTo(0,document.body.scrollHeight);
+
+      try {
+        let res = await fetch(API_URL, {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({prompt:text})
+        });
+
+        if (!res.ok) {
+          throw new Error("HTTP " + res.status + " " + res.statusText);
+        }
+
+        let data = await res.json();
+
+        // Replace "thinking..." with Luna's reply
+        thinking.remove();
+        chat.innerHTML += `<div class='msg ai'>${data.reply || "(No reply from Luna)"}</div>`;
+      } catch (err) {
+        // Replace "thinking..." with error message
+        thinking.remove();
+        chat.innerHTML += `<div class='msg ai' style="color:#f66;">⚠️ Error: ${err.message}</div>`;
+      }
+
+      window.scrollTo(0,document.body.scrollHeight);
+    }
+  </script>
+</body>
+</html>
     }
   </script>
 </body>
