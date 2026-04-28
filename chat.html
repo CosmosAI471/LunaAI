@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="apple-touch-icon" sizes="180x180" href="/Fevicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/Fevicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/Fevicon/favicon-16x16.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/Fevicon/site.webmanifest">
+  
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Luna</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        :root{
+            --bg:#0b0b10; --panel:#14141b; --muted:#9aa0b4; --accent:#6a11cb; --glass: rgba(255,255,255,0.03);
+        }
+        *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+        html,body{height:100%;margin:0;background:linear-gradient(180deg,#0b0b10 0%, #0f0f18 100%);color:#e8eaf6}
+
+        #app-root{height:100vh;display:flex;align-items:stretch}
+
+        /* Sidebar */
+        #sidebar{width:280px;background:var(--panel);border-right:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;position:fixed;left:0;top:0;height:100vh;z-index:100;transition:transform 0.25s;transform:translateX(0);}
+        #sidebar.closed{transform:translateX(-100%)}
+        #sidebar-header{padding:16px;display:flex;align-items:center;justify-content:space-between}
+        #conversation-list{overflow:auto;flex:1;padding:8px}
+        .convo-item{padding:12px;border-radius:8px;margin-bottom:8px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:space-between;}
+        .convo-item.active{background:linear-gradient(90deg,var(--accent),#2575fc);color:#fff}
+        .sidebar-action-btn{background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;margin-left:4px;}
+
+        #close-sidebar-btn{background:var(--accent);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;}
+        
+        /* Main chat area */
+        #main-content{flex:1;display:flex;flex-direction:column;position:relative;margin-left:280px;transition:margin-left .25s;}
+        #sidebar.closed ~ #main-content{margin-left:0;}
+        #chat-header{padding:14px;border-bottom:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;gap:12px}
+        #chat-window{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:12px; scroll-behavior: auto;}
+
+        .message-container{display:flex;width:100%}
+        .ai-message-container{justify-content:flex-start}
+        .user-message-container{justify-content:flex-end}
+        .message{max-width:78%;padding:10px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;position:relative}
+        .user-message{background:linear-gradient(90deg,#6a11cb,#2575fc);color:white;border-bottom-right-radius:6px}
+        .ai-message{background:linear-gradient(90deg,#111214, #1b1c28); color:var(--muted);border-bottom-left-radius:6px}
+
+        /* Code block inside messages */
+        .code-block{
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 8px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+            white-space: pre;
+            overflow-x: auto;
+            color: #e8eefb;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .code-lang{
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom:6px;
+            display:block;
+        }
+        .copy-btn{
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.04);
+            color: var(--muted);
+            padding: 6px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .copy-btn.copied{
+            background: var(--accent);
+            color: white;
+        }
+
+        #input-area{position:sticky;bottom:0;z-index:40;display:flex;gap:8px;padding:10px;background:linear-gradient(180deg, rgba(11,11,16,0.0), rgba(11,11,16,0.6));align-items:center}
+
+        /* Removed attachment button - input now only mic, text area, send */
+        #user-input{flex:1;padding:12px 14px;border-radius:24px;border:1px solid rgba(255,255,255,0.04);background:#0f0f14;color:#e8eaf6;min-width:0;resize:vertical;overflow-y:auto;outline:none}
+        .icon-button{width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:none;background:var(--accent);color:#fff;cursor:pointer}
+        .icon-button.small{width:38px;height:38px}
+
+        #mic-button.recording{box-shadow:0 0 0 6px rgba(255,80,80,0.08),0 0 20px rgba(255,80,80,0.08);background:#ff5050}
+        #send-button.stop{background:#ff6b6b}
+
+        .popover{position:absolute;right:18px;top:56px;background:var(--panel);border-radius:10px;padding:8px;box-shadow:0 8px 30px rgba(0,0,0,0.6);display:none;min-width:220px}
+        .popover.open{display:block}
+        .popover button{width:100%;text-align:left;padding:10px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer}
+        .popover button:hover{background:rgba(255,255,255,0.02);color:#fff}
+
+        #camera-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:120}
+        #camera-modal video{width:90%;max-width:460px;border-radius:8px;border:2px solid var(--accent)}
+
+        /* Auth modal styling */
+        #auth-modal{
+            position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,.74);display:flex;align-items:center;justify-content:center;z-index:200;
+        }
+        #auth-form{
+            background:var(--panel);padding:32px 28px 20px 28px;border-radius:16px;box-shadow:0 6px 32px rgba(0,0,0,0.3);width:330px;display:flex;flex-direction:column;gap:14px;
+        }
+        #auth-form input{border-radius:8px;padding:12px 10px;font-size:16px;border:none;margin-bottom:8px;background:rgba(255,255,255,0.07);color:#fff;width:100%;}
+        #auth-form button{padding:10px 0;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:16px;font-weight:600;}
+        #auth-form .auth-switch{cursor:pointer;color:var(--accent);background:transparent;border:none;margin-top:6px;margin-bottom:0;text-align:left}
+        #auth-form h2{margin-top:0;margin-bottom:6px;font-weight:700;font-size:21px;color:var(--accent);}
+        #auth-error{color:#ff5050;font-size:15px;}
+
+        /* Small screens */
+        @media (max-width:900px){
+            #sidebar{display:block;position:fixed;left:0;top:0;height:100vh;width:100vw;z-index:100;}
+            #sidebar.closed{transform:translateX(-100%)}
+            #main-content{margin-left:0;}
+            #chat-header{justify-content:space-between}
+            #chat-header-title{font-weight:600}
+        }
+        body, html {height:100%}
+        #chat-window{padding-bottom:120px}
+    </style>
+
+    <!-- Firebase SDKs (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div id="app-root">
+        <aside id="sidebar" class="closed">
+            <div id="sidebar-header">
+                <strong>Conversations</strong>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <button id="new-chat-btn" title="New chat" class="icon-button">➕</button>
+                    <button id="close-sidebar-btn" title="Close Sidebar" class="icon-button small">✖</button>
+                </div>
+            </div>
+            <div id="conversation-list"><div style="padding:16px;color:var(--muted)">Loading...</div></div>
+        </aside>
+
+        <main id="main-content">
+            <header id="chat-header">
+                <div style="display:flex;align-items:center;gap:12px;width:100%">
+                    <button id="sidebar-toggle" class="icon-button small" title="Open sidebar" aria-label="Open Sidebar">☰</button>
+                    <div id="chat-header-title">🌙 Luna</div>
+                    <div style="margin-left:auto;position:relative">
+                        <button id="three-dots" class="icon-button small" aria-label="more">⋯</button>
+                        <div id="three-dots-popover" class="popover" role="menu" aria-hidden="true">
+                            <button id="clear-conversation">Clear conversation</button>
+                            <button id="rename-convo">Rename conversation</button>
+                            <button id="export-convo">Export as JSON</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <section id="chat-window" aria-live="polite">
+                <div class="message-container ai-message-container"><div class="message ai-message">Initializing…</div></div>
+            </section>
+
+            <div id="file-status-area" style="padding:8px 16px;background:transparent"></div>
+
+            <div id="input-area">
+                <button id="mic-button" class="icon-button" title="Record audio">
+                    <svg id="mic-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="white" d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zM19 11v1c0 3.31-2.69 6-6 6s-6-2.69-6-6v-1H5v1c0 4.08 3.05 7.44 7 7.93V23h2v-3.07c3.95-.49 7-3.85 7-7.93v-1h-2z"/></svg>
+                </button>
+
+                <textarea id="user-input" rows="2" placeholder="Type your message..." autocomplete="off"></textarea>
+
+                <button id="send-button" class="icon-button" title="Send">
+                    <svg id="send-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="white" d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+                </button>
+            </div>
+
+            <div id="camera-modal">
+                <video id="camera-feed" autoplay playsinline></video>
+                <div style="margin-top:12px;display:flex;gap:12px">
+                    <button id="snap-button" class="icon-button">Snap</button>
+                    <button id="close-camera-button" class="icon-button">Close</button>
+                </div>
+                <canvas id="camera-canvas" style="display:none"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <audio id="audio-player" controls style="display:none"></audio>
+
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" style="display:none;">
+      <form id="auth-form" autocomplete="off">
+        <h2 id="auth-title">Login</h2>
+        <div id="auth-error"></div>
+        <input id="auth-name" type="text" placeholder="Custom Name (for signup)" style="display:none;">
+        <input id="auth-email" type="email" placeholder="Email" autocomplete="username" required>
+        <input id="auth-password" type="password" placeholder="Password" autocomplete="current-password" required>
+        <button type="submit" id="auth-action">Login</button>
+        <button type="button" class="auth-switch" id="auth-switch-btn">Don't have an account? Sign up</button>
+      </form>
+    </div>
+
+    <script type="module">
+        import { Client } from 'https://cdn.jsdelivr.net/npm/@gradio/client@latest/dist/index.min.js';
+
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBw2zk_4_qNqMCy8FrEALX_MZ5qOCu0vSE",
+            authDomain: "luna-588ba.firebaseapp.com",
+            projectId: "luna-588ba",
+            storageBucket: "luna-588ba.firebasestorage.app",
+            messagingSenderId: "694784257459",
+            appId: "1:694784257459:web:eaab24336174766c7cafc6",
+            measurementId: "G-QC1M835FZ9"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // GRADIO CONFIG
+        const SPACE_ID = 'cosmosai471/come_onnn';
+        const CHAT_ENDPOINT_CANDIDATES = ['/chat_generator','/chat_generator_1','/chat_generator_2'];
+        const TRANSCRIBE = '/transcribe_audio';
+
+        // --- App State ---
+        let client, selectedChatEndpoint = null;
+        let currentJob = null;
+        let stopRequested = false;
+
+        let currentUser = null;
+        let conversations = [];
+        let currentConvoId = null;
+        let convoName = "";
+        let messagesUnsub = null; // active listener for messages
+
+        // Keep a reference to the currently-streaming AI doc and its inactivity timeout
+        let currentAiDocRef = null;
+        let streamingTimeoutId = null;
+
+        // Message DOM cache to avoid full re-renders (prevents jumpy scroll during streaming)
+        let msgMap = new Map(); // msgId -> element
+
+        // DOM refs
+        const sidebar = document.getElementById('sidebar');
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const micButton = document.getElementById('mic-button');
+        const threeDots = document.getElementById('three-dots');
+        const popover = document.getElementById('three-dots-popover');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarCloseBtn = document.getElementById('close-sidebar-btn');
+        const conversationList = document.getElementById('conversation-list');
+        const clearConvoBtn = document.getElementById('clear-conversation');
+        const renameConvoBtn = document.getElementById('rename-convo');
+        const exportConvoBtn = document.getElementById('export-convo');
+        const chatHeaderTitle = document.getElementById('chat-header-title');
+
+        const authModal = document.getElementById('auth-modal');
+        const authForm = document.getElementById('auth-form');
+        const authSwitchBtn = document.getElementById('auth-switch-btn');
+        const authTitle = document.getElementById('auth-title');
+        const authNameInput = document.getElementById('auth-name');
+        const authEmailInput = document.getElementById('auth-email');
+        const authPasswordInput = document.getElementById('auth-password');
+        const authActionBtn = document.getElementById('auth-action');
+        const authError = document.getElementById('auth-error');
+
+        // --- Helpers to render/refresh single message content (supports code blocks + copy) ---
+        function setMessageContent(messageDiv, text) {
+            // messageDiv is the inner .message element
+            messageDiv.innerHTML = ''; // clear previous contents
+
+            if (typeof text === 'string' && text.includes('```')) {
+                const parts = text.split(/```/);
+                for (let i = 0; i < parts.length; i++) {
+                    const part = parts[i];
+                    if (i % 2 === 0) {
+                        if (part && part.length) {
+                            const span = document.createElement('div');
+                            span.textContent = part;
+                            messageDiv.appendChild(span);
+                        }
+                    } else {
+                        let code = part;
+                        let lang = '';
+                        const lines = part.split('\n');
+                        if (lines.length > 1 && /^[a-zA-Z0-9\-+_]+$/.test(lines[0].trim())) {
+                            lang = lines[0].trim();
+                            code = lines.slice(1).join('\n');
+                        }
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'code-block';
+                        if (lang) {
+                            const langTag = document.createElement('span');
+                            langTag.className = 'code-lang';
+                            langTag.textContent = lang;
+                            wrapper.appendChild(langTag);
+                        }
+
+                        const copyBtn = document.createElement('button');
+                        copyBtn.className = 'copy-btn';
+                        copyBtn.type = 'button';
+                        copyBtn.innerText = 'Copy';
+                        copyBtn.title = 'Copy code';
+                        copyBtn.onclick = async (ev) => {
+                            ev.stopPropagation();
+                            try {
+                                await navigator.clipboard.writeText(code);
+                                copyBtn.classList.add('copied');
+                                copyBtn.innerText = 'Copied!';
+                                setTimeout(()=>{ copyBtn.classList.remove('copied'); copyBtn.innerText = 'Copy'; }, 1500);
+                            } catch(err){
+                                copyBtn.innerText = 'Failed';
+                                setTimeout(()=>{ copyBtn.innerText = 'Copy'; }, 1500);
+                            }
+                        };
+                        wrapper.appendChild(copyBtn);
+
+                        const codeEl = document.createElement('pre');
+                        const codeNode = document.createElement('code');
+                        codeNode.textContent = code;
+                        codeEl.appendChild(codeNode);
+                        wrapper.appendChild(codeEl);
+                        messageDiv.appendChild(wrapper);
+                    }
+                }
+            } else {
+                // plain text
+                messageDiv.textContent = text;
+            }
+        }
+
+        function renderMessageContainer(docId, data) {
+            const container = document.createElement('div');
+            container.className = 'message-container ' + (data.sender === 'user' ? 'user-message-container' : 'ai-message-container');
+            container.dataset.msgId = docId;
+
+            const m = document.createElement('div');
+            m.className = 'message ' + (data.sender === 'user' ? 'user-message' : 'ai-message');
+
+            setMessageContent(m, data.text || '');
+            container.appendChild(m);
+            return container;
+        }
+
+        // --- Utility for initial add message (no full snapshot) ---
+        function addMessageToWindow(text, sender = 'ai') {
+            const tempId = 'tmp-' + Math.random().toString(36).slice(2);
+            const el = renderMessageContainer(tempId, { sender, text });
+            // temp messages are not kept in msgMap
+            chatWindow.appendChild(el);
+            if (chatWindow.scrollHeight - chatWindow.scrollTop - chatWindow.clientHeight < 150) chatWindow.scrollTop = chatWindow.scrollHeight;
+            return el;
+        }
+
+        function clearMessages() {
+            chatWindow.innerHTML = '';
+            msgMap.clear();
+        }
+
+        // Replace send button with stop button and vice-versa
+        function setSendingState(sending) {
+            if (sending) {
+                sendButton.classList.add('stop');
+                sendButton.title = 'Stop response';
+                sendButton.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20"><rect x="6" y="6" width="12" height="12" fill="white"/></svg>';
+            } else {
+                sendButton.classList.remove('stop');
+                sendButton.title = 'Send';
+                sendButton.innerHTML = '<svg id="send-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="white" d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>';
+            }
+        }
+
+        // --- Sidebar/open/close ---
+        sidebarToggle.addEventListener('click', () => sidebar.classList.remove('closed'));
+        sidebarCloseBtn.addEventListener('click', () => sidebar.classList.add('closed'));
+
+        // --- Popover ---
+        threeDots.addEventListener('click', () => popover.classList.toggle('open'));
+        document.addEventListener('click', (e) => {
+            if (!threeDots.contains(e.target) && !popover.contains(e.target))
+                popover.classList.remove('open');
+        });
+
+        // --- Auth logic ---
+        let isSignupMode = false;
+        function showAuthModal(show=true){
+            authModal.style.display = show ? 'flex' : 'none';
+        }
+
+        function updateAuthMode(){
+            if (isSignupMode){
+                authTitle.innerText = "Sign up";
+                authActionBtn.innerText = "Sign up";
+                authNameInput.style.display = '';
+                authSwitchBtn.innerText = "Already have account? Login";
+            }else{
+                authTitle.innerText = "Login";
+                authActionBtn.innerText = "Login";
+                authNameInput.style.display = 'none';
+                authSwitchBtn.innerText = "Don't have an account? Sign up";
+            }
+        }
+        authSwitchBtn.onclick = ()=>{
+            isSignupMode = !isSignupMode;
+            updateAuthMode();
+            authError.textContent='';
+        };
+
+        authForm.onsubmit = async (e)=>{
+            e.preventDefault();
+            const email = authEmailInput.value.trim();
+            const password = authPasswordInput.value;
+            const name = authNameInput.value.trim();
+            authError.textContent='';
+            authActionBtn.disabled = true;
+            try{
+                if (isSignupMode){
+                    if (!name){ authError.textContent='Enter a custom name.'; authActionBtn.disabled=false; return;}
+                    const userCred = await auth.createUserWithEmailAndPassword(email,password);
+                    await userCred.user.updateProfile({displayName:name});
+                    await db.collection("users").doc(userCred.user.uid).set({
+                        displayName:name,email:email,created:firebase.firestore.FieldValue.serverTimestamp(),
+                    });
+                }
+                else{
+                    await auth.signInWithEmailAndPassword(email,password);
+                }
+                showAuthModal(false);
+            }catch(err){
+                authError.textContent=err.message;
+            }
+            authActionBtn.disabled=false;
+        };
+
+        auth.onAuthStateChanged(async(user)=>{
+            if (!user){
+                showAuthModal(true);
+                updateAuthMode();
+                return;
+            }
+            showAuthModal(false);
+            currentUser = user;
+            chatHeaderTitle.innerText = `🌙 Luna - ${user.displayName||user.email}`;
+            await loadConversations();
+        });
+
+        // --- Conversations logic ---
+        async function loadConversations(){
+            if (!currentUser) return;
+            const querySnap = await db.collection('users').doc(currentUser.uid).collection('convos').orderBy('updated','desc').get();
+            conversations = querySnap.docs.map(d=>({id:d.id,...d.data()}));
+            renderConversationList();
+            if (!currentConvoId && conversations.length){
+                selectConversation(conversations[0].id);
+            }else if (!conversations.length){
+                startNewConversation();
+            }else{
+                if (!conversations.find(c=>c.id===currentConvoId)) selectConversation(conversations[0].id);
+                else selectConversation(currentConvoId);
+            }
+        }
+
+        function renderConversationList(){
+            conversationList.innerHTML = '';
+            if (!conversations.length){
+                conversationList.innerHTML = '<div style="padding:12px;color:var(--muted)">No chats yet.</div>';
+            }
+            for(let c of conversations){
+                const div = document.createElement('div');
+                div.className = "convo-item" + (c.id===currentConvoId?' active':'');
+                div.innerHTML = `<span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name||'Untitled'}</span>
+                  <span>
+                    <button class="sidebar-action-btn rename-btn" data-id="${c.id}" title="Rename">✏️</button>
+                    <button class="sidebar-action-btn delete-btn" data-id="${c.id}" title="Delete">🗑️</button>
+                  </span>`;
+                div.onclick = ()=> selectConversation(c.id);
+                conversationList.appendChild(div);
+            }
+            conversationList.querySelectorAll('.rename-btn').forEach(btn=>{
+                btn.onclick = (e) => { e.stopPropagation(); renameConversationPrompt(btn.dataset.id); };
+            });
+            conversationList.querySelectorAll('.delete-btn').forEach(btn=>{
+                btn.onclick = (e) => { e.stopPropagation(); deleteConversation(btn.dataset.id); };
+            });
+        }
+
+        async function selectConversation(id){
+            currentConvoId = id;
+            const convo = conversations.find(c=>c.id===id);
+            convoName = convo?.name??"";
+            chatHeaderTitle.innerText = `🌙 Luna - ${currentUser.displayName||currentUser.email} | ${convo?.name||'Untitled'}`;
+            // detach previous listener
+            if (messagesUnsub) { try { messagesUnsub(); } catch(e){} messagesUnsub = null; }
+            msgMap.clear();
+            clearMessages();
+            await subscribeMessages(id);
+            // close sidebar on selection
+            sidebar.classList.add('closed');
+            renderConversationList();
+        }
+
+        // Subscribe to messages and reflect streaming state to send button
+        async function subscribeMessages(convoId){
+            const convoRef = db.collection('users').doc(currentUser.uid).collection('convos').doc(convoId);
+
+            messagesUnsub = convoRef.collection('messages').orderBy('timestamp').onSnapshot(snapshot=>{
+                // Preserve scroll behavior:
+                const prevScrollTop = chatWindow.scrollTop;
+                const prevScrollHeight = chatWindow.scrollHeight;
+                const clientHeight = chatWindow.clientHeight;
+                const prevDistanceFromBottom = prevScrollHeight - prevScrollTop - clientHeight;
+                const isNearBottom = prevDistanceFromBottom < 150;
+
+                // Build fragment in the order of docs while reusing existing DOM nodes where possible
+                const fragment = document.createDocumentFragment();
+                const seen = new Set();
+
+                snapshot.docs.forEach(doc => {
+                    const id = doc.id;
+                    const data = doc.data();
+                    seen.add(id);
+
+                    if (msgMap.has(id)) {
+                        const existing = msgMap.get(id);
+                        // update content if changed
+                        const messageDiv = existing.querySelector('.message');
+                        setMessageContent(messageDiv, data.text || '');
+                        fragment.appendChild(existing);
+                    } else {
+                        const el = renderMessageContainer(id, data);
+                        msgMap.set(id, el);
+                        fragment.appendChild(el);
+                    }
+                });
+
+                // Remove any DOM nodes that exist in msgMap but are not in snapshot (deleted)
+                for (const [mid, el] of msgMap.entries()) {
+                    if (!seen.has(mid)) {
+                        // remove from DOM if present and delete from map
+                        try { if (el.parentNode) el.parentNode.removeChild(el); } catch(e){}
+                        msgMap.delete(mid);
+                    }
+                }
+
+                // Replace chatWindow children with fragment (re-uses nodes from msgMap)
+                // Instead of innerHTML = '' (which would destroy nodes), we remove all and append fragment.
+                while (chatWindow.firstChild) chatWindow.removeChild(chatWindow.firstChild);
+                chatWindow.appendChild(fragment);
+
+                // Determine streaming state and update send/stop button
+                let anyStreaming = snapshot.docs.some(d => d.data().streaming === true);
+                setSendingState(anyStreaming);
+
+                // Restore scroll
+                if (isNearBottom) {
+                    chatWindow.scrollTop = chatWindow.scrollHeight; // scroll to bottom
+                } else {
+                    // Keep user's current view position stable by adjusting by difference in scrollHeight
+                    const newScrollHeight = chatWindow.scrollHeight;
+                    const delta = newScrollHeight - prevScrollHeight;
+                    chatWindow.scrollTop = Math.max(0, prevScrollTop + delta);
+                }
+            }, err=>{
+                console.warn('Messages snapshot error', err);
+            });
+        }
+
+        async function startNewConversation(){
+            const ref = db.collection('users').doc(currentUser.uid).collection('convos').doc();
+            await ref.set({name:`Conversation ${(conversations.length+1)}`,created:firebase.firestore.FieldValue.serverTimestamp(),updated:firebase.firestore.FieldValue.serverTimestamp()});
+            currentConvoId = ref.id;
+            await loadConversations();
+            sidebar.classList.add('closed');
+        }
+        newChatBtn.onclick = async()=>{
+            await startNewConversation();
+        };
+
+        async function deleteConversation(id){
+            await db.collection('users').doc(currentUser.uid).collection('convos').doc(id).delete();
+            if (currentConvoId === id) currentConvoId = null;
+            await loadConversations();
+        }
+
+        async function renameConversationPrompt(id){
+            const current = conversations.find(c=>c.id===id)?.name ?? "";
+            const name = prompt("Rename conversation:", current);
+            if (!name) return;
+            await db.collection('users').doc(currentUser.uid).collection('convos').doc(id).update({name,updated:firebase.firestore.FieldValue.serverTimestamp()});
+            await loadConversations();
+        }
+        renameConvoBtn.onclick = ()=>{
+            if (!currentConvoId) return;
+            renameConversationPrompt(currentConvoId);
+        };
+
+        clearConvoBtn.onclick = async()=>{
+            if (!currentConvoId) return;
+            const msgsRef = db.collection('users').doc(currentUser.uid).collection('convos').doc(currentConvoId).collection('messages');
+            const snaps = await msgsRef.get();
+            const batch = db.batch();
+            snaps.forEach(doc => batch.delete(msgsRef.doc(doc.id)));
+            await batch.commit();
+            clearMessages();
+            addMessageToWindow('Conversation cleared.','ai');
+        };
+
+        exportConvoBtn.onclick = async()=>{
+            if (!currentConvoId) return;
+            const name = conversations.find(c=>c.id===currentConvoId)?.name || "Conversation";
+            const msgsSnap = await db.collection('users').doc(currentUser.uid).collection('convos').doc(currentConvoId).collection('messages').orderBy('timestamp').get();
+            const history = [];
+            msgsSnap.forEach(doc=>{
+                const {sender,text,timestamp} = doc.data();
+                history.push({sender,text,timestamp:timestamp?.toDate?.().toISOString?.()});
+            });
+            const blob = new Blob([JSON.stringify(history,null,2)],{type:'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${name.replace(/\s+/g,"_")}.json`;
+            a.click();
+        };
+
+        // --- Mic behavior/recording ---
+        let isRecording = false; let mediaRecorder=null, audioChunks=[];
+        micButton.addEventListener('click', async ()=>{
+            if (isRecording){
+                mediaRecorder.stop();
+                isRecording = false; micButton.classList.remove('recording');
+            } else {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+                    audioChunks=[]; mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = async ()=>{
+                        const blob = new Blob(audioChunks,{type:'audio/webm'});
+                        const file = new File([blob],'recording.webm',{type:'audio/webm'});
+                        addMessageToWindow('(Transcribing...)','ai');
+                        try{
+                            const res = await client.predict(TRANSCRIBE,[file]);
+                            const transcribed = res.data[0];
+                            if (transcribed){ userInput.value = transcribed; }
+                        }catch(err){ addMessageToWindow('❌ Transcription error: '+err.message,'ai'); }
+                    };
+                    mediaRecorder.start(); isRecording=true; micButton.classList.add('recording');
+                }catch(e){ addMessageToWindow('❌ Mic access denied: ' + e.message,'ai'); }
+            }
+        });
+
+        // --- Send/stop main handler ---
+        sendButton.addEventListener('click', async ()=>{
+            if (currentJob){
+                // user pressed stop -> request cancellation
+                stopRequested = true;
+                try{ if (currentJob.return) await currentJob.return(); if (currentJob.cancel) await currentJob.cancel(); }catch(e){}
+                // mark streaming doc false if present
+                if (currentAiDocRef){
+                    try{
+                        await currentAiDocRef.update({streaming:false, lastUpdated: firebase.firestore.FieldValue.serverTimestamp()});
+                    }catch(e){ console.warn('Failed to update ai doc on stop', e); }
+                    currentAiDocRef = null;
+                }
+                if (streamingTimeoutId){ clearTimeout(streamingTimeoutId); streamingTimeoutId = null; }
+                setSendingState(false);
+                currentJob = null;
+                return;
+            }
+            await sendMessage();
+        });
+
+        // Ensure Enter inserts newline (textarea default behavior preserves newline).
+        userInput.addEventListener('keydown', function(e){
+            // Intentionally allow Enter to insert newline; no send on Enter.
+        });
+
+        // Attempt to connect to Gradio space and detect working chat endpoint
+        async function connectAndDetect(){
+            try{
+                client = await Client.connect(SPACE_ID);
+                console.log('Connected to Gradio client.');
+            }catch(e){ addMessageToWindow('❌ Could not connect Gradio client: '+e.message,'ai'); return; }
+
+            for (const ep of CHAT_ENDPOINT_CANDIDATES){
+                try{
+                    const probe = await client.predict(ep, ['ping', [], [], false, false]);
+                    selectedChatEndpoint = ep; console.log('Selected endpoint',ep); break;
+                }catch(err){
+                    console.warn('Probe failed for',ep,err.message);
+                }
+            }
+            if (!selectedChatEndpoint){
+                selectedChatEndpoint = CHAT_ENDPOINT_CANDIDATES[0];
+                addMessageToWindow('⚠️ Warning: Could not auto-detect chat endpoint; using default: '+selectedChatEndpoint,'ai');
+            }
+            addMessageToWindow('Luna is ready. Say hi!','ai');
+        }
+
+        // Helper: start/reset inactivity timeout to finalize streaming AI doc after 5s of no new chunks
+        function resetStreamingTimeout(aiDocRef){
+            if (streamingTimeoutId) clearTimeout(streamingTimeoutId);
+            streamingTimeoutId = setTimeout(async ()=>{
+                try{
+                    await aiDocRef.update({streaming:false, lastUpdated: firebase.firestore.FieldValue.serverTimestamp()});
+                }catch(e){
+                    // ignore
+                } finally {
+                    streamingTimeoutId = null;
+                    setSendingState(false);
+                }
+            }, 5000);
+        }
+
+        // --- sendMessage with robust Firestore persistence, improved placeholder, and inactivity timeout ---
+        async function sendMessage(){
+            if (!client) { addMessageToWindow('❌ Backend not connected.','ai'); return; }
+            const text = userInput.value.trim();
+            if (!text || !currentUser || !currentConvoId) return;
+            userInput.value='';
+
+            const convoRef = db.collection('users').doc(currentUser.uid).collection('convos').doc(currentConvoId);
+            // Update conversation timestamp
+            await convoRef.update({updated:firebase.firestore.FieldValue.serverTimestamp()});
+
+            // Store user message first
+            await convoRef.collection('messages').add({
+                sender:'user', text, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            // Create placeholder AI message with helpful text to avoid empty box
+            const aiPlaceholder = "Transferring your message.";
+            const aiDocRef = await convoRef.collection('messages').add({
+                sender:'ai', text: aiPlaceholder, timestamp: firebase.firestore.FieldValue.serverTimestamp(), streaming: true
+            });
+
+            // keep global ref for stop handler and timeout
+            currentAiDocRef = aiDocRef;
+            resetStreamingTimeout(aiDocRef);
+
+            // UI will be updated by realtime listener; ensure send button shows stop state
+            setSendingState(true);
+            stopRequested = false;
+
+            const inputs = [text, null, [{role:'user',content:text}], false, false];
+
+            try{
+                const job = client.submit(selectedChatEndpoint, inputs);
+                currentJob = job;
+                let lastAiContent = '';
+                for await (const event of job){
+                    if (stopRequested) break;
+                    if (event.type === 'data'){
+                        try{
+                            const latestHistory = event.data[0];
+                            const latest = latestHistory[latestHistory.length-1];
+                            const content = latest?.content ?? '';
+                            lastAiContent = content;
+                            // update ai doc in Firestore (streaming) and reset inactivity timer
+                            try{
+                                await aiDocRef.update({text: content || aiPlaceholder, streaming: true, lastUpdated: firebase.firestore.FieldValue.serverTimestamp()});
+                            }catch(e){
+                                console.warn('Failed to update ai doc chunk', e);
+                            }
+                            resetStreamingTimeout(aiDocRef);
+                        }catch(e){
+                            console.warn('Malformed streaming chunk', e);
+                        }
+                    } else if (event.type === 'error'){
+                        const msg = '❌ Error: ' + (event?.message||'Unknown');
+                        try{ await aiDocRef.update({text: msg, streaming:false, lastUpdated: firebase.firestore.FieldValue.serverTimestamp()}); }catch(e){}
+                        currentAiDocRef = null;
+                    } else if (event.type === 'complete'){
+                        try{ await aiDocRef.update({text: lastAiContent || aiPlaceholder, streaming:false, lastUpdated: firebase.firestore.FieldValue.serverTimestamp()}); }catch(e){}
+                        currentAiDocRef = null;
+                        if (streamingTimeoutId){ clearTimeout(streamingTimeoutId); streamingTimeoutId = null; }
+                    }
+                }
+
+                if (stopRequested){
+                    // If user requested stop, ensure streaming flag cleared
+                    try{ await aiDocRef.update({streaming:false, lastUpdated: firebase.firestore.FieldValue.serverTimestamp()}); }catch(e){}
+                    currentAiDocRef = null;
+                    if (streamingTimeoutId){ clearTimeout(streamingTimeoutId); streamingTimeoutId = null; }
+                }
+            }catch(err){
+                console.error('Streaming failed', err);
+                try{ await aiDocRef.update({text: '❌ Error: ' + (err.message || 'Unknown'), streaming:false, lastUpdated: firebase.firestore.FieldValue.serverTimestamp()}); }catch(e){}
+                currentAiDocRef = null;
+            }finally{
+                currentJob = null; stopRequested = false;
+                // fallback: check DB for any streaming docs and clear UI if none remain
+                setTimeout(()=>{
+                    const convoMessagesRef = db.collection('users').doc(currentUser.uid).collection('convos').doc(currentConvoId).collection('messages');
+                    convoMessagesRef.where('streaming','==',true).limit(1).get().then(snap=>{
+                        if (snap.empty) setSendingState(false);
+                    }).catch(()=> setSendingState(false));
+                }, 300);
+            }
+        }
+
+        //--- Initialization ---
+        (async () => {
+            addMessageToWindow('Connecting...','ai');
+            await connectAndDetect();
+        })();
+    </script>
+</body>
+</html>

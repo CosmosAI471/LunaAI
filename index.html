@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>   
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luna AI - By Cosmos Developers</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Styles and Animations -->
+    <style>
+        /* Use the Inter font family, a Tailwind default */
+        body {
+            font-family: "Inter", sans-serif;
+        }
+
+        /* Hero background gradient glow */
+        .hero-glow {
+            background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(129, 140, 248, 0.15), transparent);
+        }
+
+        /* Fade-in animation for elements */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        /* Staggered animation delays */
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+
+        /* Set opacity to 0 to prepare for animation */
+        .fade-in-start {
+            opacity: 0;
+        }
+
+        /* Typing indicator animation */
+        @keyframes typing-dot {
+            0%, 100% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .typing-dot {
+            animation: typing-dot 1.2s infinite;
+        }
+        .dot-1 { animation-delay: 0s; }
+        .dot-2 { animation-delay: 0.2s; }
+        .dot-3 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-300 antialiased">
+
+    <!-- Header / Navigation -->
+    <header class="sticky top-0 z-50 w-full bg-gray-950/70 backdrop-blur-lg border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo / Company Name -->
+                <a href="#" class="flex items-center" aria-label="Home">
+                    <span class="text-2xl font-bold text-white">Cosmos Developers</span>
+                </a>
+                
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-300 hover:text-white transition-colors duration-200">Features</a>
+                    <a href="#demo" class="text-gray-300 hover:text-white transition-colors duration-200">Demo</a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">About</a>
+                </nav>
+                
+                <!-- CTA Button & Mobile Menu Button -->
+                <div class="flex items-center">
+                    <a href="chat.html" class="hidden sm:inline-block bg-white text-gray-900 px-5 py-2 rounded-full text-sm font-semibold hover:bg-gray-200 transition-colors duration-200">
+                        Try Luna
+                    </a>
+                    
+                    <!-- Mobile Menu Button (Hamburger) -->
+                    <button id="mobile-menu-button" class="md:hidden ml-4 p-2 text-white" aria-label="Open menu" aria-expanded="false">
+                        <!-- Menu Icon -->
+                        <svg id="menu-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                        <!-- Close Icon (hidden by default) -->
+                        <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden absolute top-16 left-0 w-full bg-gray-950 shadow-lg z-40">
+            <div classm="flex flex-col space-y-4 px-5 py-6">
+                <a href="#features" class="block text-lg text-gray-300 hover:text-white transition-colors duration-200 py-2">Features</a>
+                <a href="#demo" class="block text-lg text-gray-300 hover:text-white transition-colors duration-200 py-2">Demo</a>
+                <a href="#" class="block text-lg text-gray-300 hover:text-white transition-colors duration-200 py-2">About</a>
+                <a href="chat.html" class="block w-full text-center bg-white text-gray-900 px-5 py-3 rounded-full text-base font-semibold hover:bg-gray-200 transition-colors duration-200 mt-4">
+                    Try Luna
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="relative overflow-hidden">
+
+        <!-- Hero Section -->
+        <section class="relative pt-24 pb-32 sm:pt-32 sm:pb-40 hero-glow">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <!-- Main Headline -->
+                <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-500 animate-fade-in fade-in-start delay-100">
+                    Meet Luna.
+                </h1>
+                <h1 class="mt-2 sm:mt-4 text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white animate-fade-in fade-in-start delay-200">
+                    Your AI Co-pilot for Creativity.
+                </h1>
+                
+                <!-- Sub-headline -->
+                <p class="mt-8 text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto animate-fade-in fade-in-start delay-300">
+                    Luna is a state-of-the-art AI from Cosmos Developers, designed to understand, assist, and inspire. From drafting emails to debugging code, Luna is here to amplify your potential.
+                </p>
+                
+                <!-- Primary CTA Button -->
+                <div class="mt-12 animate-fade-in fade-in-start delay-400">
+                    <a href="chat.html" class="inline-block rounded-full bg-gradient-to-r from-purple-500 to-blue-600 px-10 py-4 text-lg font-semibold text-white shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
+                        Chat for Free
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-24 sm:py-32 bg-gray-900/50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-2xl mx-auto">
+                    <h2 class="text-base font-semibold uppercase tracking-wider text-purple-400">Features</h2>
+                    <p class="mt-2 text-3xl sm:text-4xl font-extrabold text-white">
+                        A new generation of AI
+                    </p>
+                </div>
+                
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Feature Card 1 -->
+                    <div class="bg-gray-800/50 p-8 rounded-2xl border border-gray-700 shadow-xl transform transition-transform duration-300 hover:-translate-y-2 animate-fade-in fade-in-start delay-300">
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M12 21v-1m0-18c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 class="mt-6 text-xl font-semibold text-white">Creative Partner</h3>
+                        <p class="mt-2 text-gray-400">Write poems, scripts, marketing copy, or brainstorm new ideas for any project. Luna is your endlessly creative collaborator.</p>
+                    </div>
+                    
+                    <!-- Feature Card 2 -->
+                    <div class="bg-gray-800/50 p-8 rounded-2xl border border-gray-700 shadow-xl transform transition-transform duration-300 hover:-translate-y-2 animate-fade-in fade-in-start delay-400">
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 class="mt-6 text-xl font-semibold text-white">Developer's Assistant</h3>
+                        <p class="mt-2 text-gray-400">Debug code snippets, write new functions, explain complex algorithms, or learn new programming languages and frameworks.</p>
+                    </div>
+                    
+                    <!-- Feature Card 3 -->
+                    <div class="bg-gray-800/50 p-8 rounded-2xl border border-gray-700 shadow-xl transform transition-transform duration-300 hover:-translate-y-2 animate-fade-in fade-in-start delay-500">
+                        <div class="flex-shrink-0">
+                            <div class="flex items-center justify-center h-12 w-12 rounded-md bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 012-2h1.945M3.055 11v-5a2 2 0 012-2h13.89a2 2 0 012 2v5m-18 0v5a2 2 0 002 2h13.89a2 2 0 002-2v-5m-18 0h1.945" />
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 class="mt-6 text-xl font-semibold text-white">Instant Knowledge</h3>
+                        <p class="mt-2 text-gray-400">Get complex topics explained simply. Summarize long articles, translate languages, or get quick facts on any subject.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="py-24 sm:py-32">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white text-center mb-16">
+                    See Luna in Action
+                </h2>
+                
+                <div class="bg-gray-800 rounded-2xl border border-gray-700 shadow-2xl p-6 sm:p-10">
+                    <!-- User Prompt -->
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center shadow-inner">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div class="bg-gray-900 p-4 rounded-xl rounded-tl-none w-full shadow-md">
+                            <h4 class="font-medium text-white">You</h4>
+                            <p class="text-gray-300 mt-1">Explain quantum computing in simple terms for a 10-year-old.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Response -->
+                    <div class="mt-8 flex items-start gap-4">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M12 21v-1m0-18c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8z" />
+                            </svg>
+                        </div>
+                        <div class="bg-gray-900 p-4 rounded-xl rounded-bl-none w-full shadow-md">
+                            <h4 class="font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">Luna</h4>
+                            <p class="text-gray-300 mt-2">
+                                Imagine you have a magic coin. While it's spinning in the air, it's not heads or tails... it's kind of *both* at the same time! You only find out which one it is when it lands.
+                            </p>
+                            <p class="text-gray-300 mt-3">
+                                Normal computers are like light switches: they are either <strong>ON (1)</strong> or <strong>OFF (0)</strong>.
+                            </p>
+                            <p class="text-gray-300 mt-3">
+                                Quantum computers are like those magic coins. Their "qubits" can be <strong>ON</strong>, <strong>OFF</strong>, or <strong>both at the same time</strong>! This lets them try out millions of possibilities all at once, making them super powerful for solving really, really hard problems.
+                            </p>
+                            
+                            <!-- Typing indicator -->
+                            <div class="flex items-center gap-1.5 mt-4">
+                                <div class="typing-dot dot-1 w-2 h-2 bg-gray-500 rounded-full"></div>
+                                <div class="typing-dot dot-2 w-2 h-2 bg-gray-500 rounded-full"></div>
+                                <div class="typing-dot dot-3 w-2 h-2 bg-gray-500 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA Section -->
+        <section class="py-24 sm:py-32 bg-gradient-to-r from-purple-600 to-blue-600">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white">
+                    Ready to explore the future?
+                </h2>
+                <p class="mt-4 text-lg text-purple-100">
+                    Join Cosmos Developers and start your journey with Luna today.
+                </p>
+                <a href="chat.html" class="mt-10 inline-block rounded-full bg-white px-10 py-4 text-lg font-semibold text-gray-900 shadow-lg hover:shadow-xl hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
+                    Start Chatting for Free
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-12 bg-gray-950 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <!-- Copyright -->
+                <p class="text-sm text-gray-500">
+                    © 2025 Cosmos Developers. All rights reserved.
+                </p>
+                
+                <!-- Footer Links -->
+                <div class="flex items-center gap-6">
+                    <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors duration-200">Terms of Service</a>
+                    <a href="#" class="text-sm text-gray-400 hover:text-white transition-colors duration-200">Privacy Policy</a>
+                </div>
+                
+                <!-- Social Icons -->
+                <div class="flex items-center gap-5">
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors duration-200" aria-label="Twitter">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.054 0 13.999-7.496 13.999-13.986 0-.213 0-.425-.015-.637A9.953 9.953 0 0023.953 4.57z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-white transition-colors duration-200" aria-label="GitHub">
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.489.5.09.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.602-3.369-1.34-3.369-1.34-.454-1.158-1.11-1.466-1.11-1.466-.908-.618.069-.606.069-.606 1.003.07 1.531 1.03 1.531 1.03.892 1.527 2.34 1.086 2.91.83.09-.645.35-1.083.636-1.332-2.22-.251-4.555-1.107-4.555-4.939 0-1.09.39-1.984 1.029-2.685-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.025A9.547 9.547 0 0112 6.84c.85.004 1.705.114 2.504.336 1.909-1.293 2.748-1.025 2.748-1.025.546 1.377.203 2.394.1 2.647.64.701 1.029 1.595 1.029 2.685 0 3.841-2.337 4.685-4.566 4.932.359.308.678.915.678 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.18.577.688.48C19.135 20.165 22 16.418 22 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript for animations and mobile menu -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Fade-in animations
+            document.querySelectorAll('.fade-in-start').forEach(function(el) {
+                // Ensure elements are visible for the animation
+                el.classList.remove('fade-in-start');
+                el.classList.add('animate-fade-in');
+            });
+
+            // Mobile menu toggle
+            const menuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('menu-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            menuButton.addEventListener('click', function() {
+                const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+                
+                // Toggle aria-expanded attribute
+                menuButton.setAttribute('aria-expanded', !isExpanded);
+                
+                // Toggle menu visibility
+                mobileMenu.classList.toggle('hidden');
+                
+                // Toggle icons
+                menuIcon.classList.toggle('hidden');
+                closeIcon.classList.toggle('hidden');
+            });
+
+            // Close mobile menu when a link is clicked
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    menuButton.setAttribute('aria-expanded', 'false');
+                    menuIcon.classList.remove('hidden');
+                    closeIcon.classList.add('hidden');
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
