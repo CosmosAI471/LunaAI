@@ -14,42 +14,47 @@ def chat():
     data = request.json
     user_text = data.get("text")
     
-    if not user_text:
-        return jsonify({"error": "No message provided"}), 400
+    print(f">>> Received prompt: {user_text}", flush=True)
 
     try:
-        # Connect to the AI
-        print(f"Connecting to {HF_SPACE}...", flush=True)
         client = Client(HF_SPACE)
-        
-        # EXACT parameters from your Gradio docs:
-        # 1. message_from_input (str)
-        # 2. history (list)
+        # Your API documentation says /chat_generator takes (str, list)
         result = client.predict(
             message_from_input=user_text,
             history=[], 
             api_name="/chat_generator"
         )
         
-        # Your docs say it returns a tuple of 6 elements. 
-        # Element [0] is the history list.
-        if isinstance(result, (list, tuple)) and len(result) > 0:
-            chat_history = result[0]
-            # The last message in history is Luna's response
-            if len(chat_history) > 0:
-                ai_response = chat_history[-1]['content']
-                return jsonify({"response": ai_response})
+        print(f">>> Raw Result from HF: {result}", flush=True)
+
+        # AGGRESSIVE SEARCH FOR THE RESPONSE TEXT
+        ai_response = None
+
+        if isinstance(result, (list, tuple)):
+            # Check Index 2 first (Your docs say this is the Textbox string)
+            if len(result) > 2 and isinstance(result[2], str) and len(result[2]) > 0:
+                ai_response = result[2]
+            # Check Index 0 (The Chatbot history list)
+            elif len(result) > 0 and isinstance(result[0], list) and len(result[0]) > 0:
+                last_msg = result[0][-1]
+                if isinstance(last_msg, dict) and 'content' in last_msg:
+                    ai_response = last_msg['content']
+                elif isinstance(last_msg, (list, tuple)) and len(last_msg) > 1:
+                    ai_response = last_msg[1] # Older Gradio format
+
+        if ai_response:
+            print(f">>> Success! Sending: {ai_response[:50]}...", flush=True)
+            return jsonify({"response": ai_response})
         
-        return jsonify({"response": "Luna didn't return a text response."})
+        return jsonify({"response": "Luna reached Hugging Face, but the AI didn't send back text. Check if the Space is working manually."})
 
     except Exception as e:
-        # This will now definitely show up in Render Logs
-        print(f"!!! BACKEND ERROR: {str(e)}", flush=True) 
-        return jsonify({"error": str(e)}), 503
+        print(f"!!! CRITICAL ERROR: {str(e)}", flush=True)
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/health')
 def health():
-    return "Backend is Live", 200
+    return "Luna is Online", 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
