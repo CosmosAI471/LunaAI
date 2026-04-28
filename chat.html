@@ -40,7 +40,7 @@
     </div>
 
     <script>
-        // 1. PASTE YOUR FIREBASE CONFIG HERE
+        // 1. FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyBw2zk_4_qNqMCy8FrEALX_MZ5qOCu0vSE",
             authDomain: "luna-588ba.firebaseapp.com",
@@ -50,12 +50,12 @@
             appId: "1:694784257459:web:eaab24336174766c7cafc6",
             measurementId: "G-QC1M835FZ9"
         };
+        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // 2. YOUR RENDER URL
-        // Copy this from the top of your Render Dashboard (e.g., https://luna-backend.onrender.com)
+        // 2. BACKEND URL
         const BACKEND_URL = "https://lunabackend-oh3l.onrender.com/chat";
 
         const chatWindow = document.getElementById('chat-window');
@@ -65,8 +65,11 @@
         let currentUser = null;
 
         auth.onAuthStateChanged(user => {
-            if (user) { currentUser = user; } 
-            else { window.location.href = "index.html"; }
+            if (user) { 
+                currentUser = user; 
+            } else { 
+                window.location.href = "index.html"; 
+            }
         });
 
         function addMessage(text, sender) {
@@ -79,49 +82,52 @@
         }
 
         async function sendMessage() {
-    const text = userInput.value.trim();
-    if (!text || !currentUser || sendBtn.disabled) return;
+            const text = userInput.value.trim();
+            if (!text || !currentUser || sendBtn.disabled) return;
 
-    userInput.value = '';
-    sendBtn.disabled = true;
+            // Clear input and disable UI
+            userInput.value = '';
+            sendBtn.disabled = true;
 
-    addMessage(text, 'user');
-    const aiMsgDiv = addMessage("Luna is thinking...", 'ai');
+            addMessage(text, 'user');
+            const aiMsgDiv = addMessage("Luna is thinking...", 'ai');
 
-    try {
-        const response = await fetch(BACKEND_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: text })
-        });
+            try {
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
 
-        const data = await response.json();
+                const data = await response.json();
 
-        if (data.error) {
-            // SHOW THE REAL ERROR ON SCREEN FOR MOBILE DEBUGGING
-            aiMsgDiv.style.color = "#ff4d4d";
-            aiMsgDiv.textContent = "Backend Error: " + data.error;
-        } else {
-            aiMsgDiv.textContent = data.response;
-            
-            // Save to Firebase
-            db.collection('users').doc(currentUser.uid).collection('chats').add({
-                user: text,
-                ai: data.response,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        }
-    } catch (err) {
-        aiMsgDiv.style.color = "#ff4d4d";
-        aiMsgDiv.textContent = "Network Error: Could not reach Render server. Check your BACKEND_URL.";
-        console.error(err);
-    } finally {
-        sendBtn.disabled = false;
-    }
+                if (data.error) {
+                    aiMsgDiv.style.color = "#ff4d4d";
+                    aiMsgDiv.textContent = "Backend Error: " + data.error;
+                } else {
+                    aiMsgDiv.textContent = data.response;
+                    
+                    // Save to Firebase
+                    db.collection('users').doc(currentUser.uid).collection('chats').add({
+                        user: text,
+                        ai: data.response,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            } catch (err) {
+                aiMsgDiv.style.color = "#ff4d4d";
+                aiMsgDiv.textContent = "Network Error: Could not reach Render server. Check your BACKEND_URL.";
+                console.error(err);
+            } finally {
+                sendBtn.disabled = false;
+                userInput.focus(); // Good for desktop usability
+            }
         }
 
         sendBtn.addEventListener('click', sendMessage);
-        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+        userInput.addEventListener('keypress', (e) => { 
+            if (e.key === 'Enter') sendMessage(); 
+        });
     </script>
 </body>
 </html>
