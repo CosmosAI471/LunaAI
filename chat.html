@@ -79,42 +79,45 @@
         }
 
         async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text || !currentUser || sendBtn.disabled) return;
+    const text = userInput.value.trim();
+    if (!text || !currentUser || sendBtn.disabled) return;
 
-            userInput.value = '';
-            sendBtn.disabled = true;
+    userInput.value = '';
+    sendBtn.disabled = true;
 
-            addMessage(text, 'user');
-            const aiMsgDiv = addMessage("Luna is thinking...", 'ai');
+    addMessage(text, 'user');
+    const aiMsgDiv = addMessage("Luna is thinking...", 'ai');
 
-            try {
-                const response = await fetch(BACKEND_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: text })
-                });
+    try {
+        const response = await fetch(BACKEND_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        });
 
-                const data = await response.json();
+        const data = await response.json();
 
-                if (data.error) {
-                    aiMsgDiv.textContent = "Luna is waking up. Please wait 10 seconds and try again.";
-                } else {
-                    aiMsgDiv.textContent = data.response;
-                    
-                    // Save to Firebase (Optional but recommended)
-                    db.collection('users').doc(currentUser.uid).collection('chats').add({
-                        user: text,
-                        ai: data.response,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-            } catch (err) {
-                aiMsgDiv.textContent = "Connection error. Make sure your Render backend is running.";
-                console.error(err);
-            } finally {
-                sendBtn.disabled = false;
-            }
+        if (data.error) {
+            // SHOW THE REAL ERROR ON SCREEN FOR MOBILE DEBUGGING
+            aiMsgDiv.style.color = "#ff4d4d";
+            aiMsgDiv.textContent = "Backend Error: " + data.error;
+        } else {
+            aiMsgDiv.textContent = data.response;
+            
+            // Save to Firebase
+            db.collection('users').doc(currentUser.uid).collection('chats').add({
+                user: text,
+                ai: data.response,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+    } catch (err) {
+        aiMsgDiv.style.color = "#ff4d4d";
+        aiMsgDiv.textContent = "Network Error: Could not reach Render server. Check your BACKEND_URL.";
+        console.error(err);
+    } finally {
+        sendBtn.disabled = false;
+    }
         }
 
         sendBtn.addEventListener('click', sendMessage);
